@@ -12,16 +12,25 @@ TEST(bst_public_test) {
 
   ASSERT_TRUE(tree.size() == 1);
   ASSERT_TRUE(tree.height() == 1);
+  cout << "PASS 1" << endl;
 
   ASSERT_TRUE(tree.find(5) != tree.end());
+
+  cout << "PASS 2" << endl;
 
   tree.insert(7);
   tree.insert(3);
 
   ASSERT_TRUE(tree.check_sorting_invariant());
+    cout << "PASS 3.1" << endl;
   ASSERT_TRUE(*tree.max_element() == 7);
+    cout << "PASS 3.2" << endl;
   ASSERT_TRUE(*tree.min_element() == 3);
+    cout << "PASS 3.3" << endl;
   ASSERT_TRUE(*tree.min_greater_than(5) == 7);
+    cout << "PASS 3.4" << endl;
+
+  cout << "PASS 3" << endl;
 
   cout << "cout << tree.to_string()" << endl;
   cout << tree.to_string() << endl << endl;
