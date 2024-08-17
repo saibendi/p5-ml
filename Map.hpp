@@ -146,23 +146,17 @@ size_t Map<K, V, C>::size() const {
 template <typename K, typename V, typename C>
 typename Map<K, V, C>::Iterator Map<K, V, C>::find(const K& k) const {
     Pair_type search(k, V());
-    auto it = map_bst.find(search);
-    return it;
+    return map_bst.find(search);
 }
 
 template <typename K, typename V, typename C>
 typename Map<K, V, C>::Iterator Map<K, V, C>::begin() const {
-    assert(false);
-    /*
-    auto it = map_bst.begin();
-    return it;
-    */
+    return map_bst.begin();
 }
 
 template <typename K, typename V, typename C>
 typename Map<K, V, C>::Iterator Map<K, V, C>::end() const {
-    auto iterator = map_bst.end();
-    return iterator;
+    return map_bst.end();
 }
 
 // MODIFIES: this
@@ -183,21 +177,29 @@ typename Map<K, V, C>::Iterator Map<K, V, C>::end() const {
 // HINT: http://www.cplusplus.com/reference/map/map/operator[]/
 template <typename K, typename V, typename C>
 V& Map<K, V, C>::operator[](const K& k) {
-    if (find(k) == end()) {
-        Pair_type input(k, V());
-        auto pair = insert(input);
-        auto iterator = pair.first;
-        auto &iterator_value = *iterator;     // this doesn't work without adding & to it_dereference
-        return iterator_value.second;
-    }
-    auto i = find(k);
-    auto &pair = *i;
-    return pair.second;
+    Pair_type input(k, V());
+    auto insert_output = insert(input);
+    auto iterator = insert_output.first;
+    auto &iterator_value = *iterator;     //TODO: this doesn't work without adding & to it_dereference
+    return iterator_value.second;
 }
 
+// MODIFIES: this
+// EFFECTS : Inserts the given element into this Map if the given key
+//           is not already contained in the Map. If the key is
+//           already in the Map, returns an iterator to the
+//           corresponding existing element, along with the value
+//           false. Otherwise, inserts the given element and returns
+//           an iterator to the newly inserted element, along with
+//           the value true.
 template <typename K, typename V, typename C>
 std::pair<typename Map<K, V, C>::Iterator, bool> Map<K, V, C>::insert(const Pair_type &val) {
-    assert(false);
+    if (Map<K, V, C>::find(val.first) != Map<K, V, C>::end()) {
+        auto iterator = Map<K, V, C>::find(val.first);  //TODO: why can't we use &iterator here - you get error
+        return std::make_pair(iterator,false);
+    }
+    auto iterator = map_bst.insert(val);
+    return std::make_pair(iterator,true);
 }
 
 #endif // DO NOT REMOVE!!!
