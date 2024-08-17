@@ -145,12 +145,9 @@ size_t Map<K, V, C>::size() const {
 //       (key, value) pairs, you'll need to construct a dummy value
 template <typename K, typename V, typename C>
 typename Map<K, V, C>::Iterator Map<K, V, C>::find(const K& k) const {
-    assert(false);
-    /*
     Pair_type search(k, V());
     auto it = map_bst.find(search);
     return it;
-    */
 }
 
 template <typename K, typename V, typename C>
@@ -164,16 +161,38 @@ typename Map<K, V, C>::Iterator Map<K, V, C>::begin() const {
 
 template <typename K, typename V, typename C>
 typename Map<K, V, C>::Iterator Map<K, V, C>::end() const {
-    assert(false);
-    /*
-    auto it = map_bst.end();
-    return it;
-    */
+    auto iterator = map_bst.end();
+    return iterator;
 }
 
+// MODIFIES: this
+// EFFECTS : Returns a reference to the mapped value for the given
+//           key. If k matches the key of an element in the
+//           container, the function returns a reference to its
+//           mapped value. If k does not match the key of any
+//           element in the container, the function inserts a new
+//           element with that key and a value-initialized mapped
+//           value and returns a reference to the mapped value.
+//           Note: value-initialization for numeric types guarantees the
+//           value will be 0 (rather than memory junk).
+//
+// HINT:     In the case the key was not found, and you must insert a
+//           new element, use the expression {k, Value_type()} to create
+//           that element. This ensures the proper value-initialization is done.
+//
+// HINT: http://www.cplusplus.com/reference/map/map/operator[]/
 template <typename K, typename V, typename C>
 V& Map<K, V, C>::operator[](const K& k) {
-    assert(false);
+    if (find(k) == end()) {
+        Pair_type input(k, V());
+        auto pair = insert(input);
+        auto iterator = pair.first;
+        auto &iterator_value = *iterator;     // this doesn't work without adding & to it_dereference
+        return iterator_value.second;
+    }
+    auto i = find(k);
+    auto &pair = *i;
+    return pair.second;
 }
 
 template <typename K, typename V, typename C>
