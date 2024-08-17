@@ -148,7 +148,7 @@ public:
   bool check_sorting_invariant() const {
     return check_sorting_invariant_impl(root, less);
   }
-
+//--------------------------------------------------------------------------------------------------------ITERATOR BEGINS------------------------------------------------------------------------
   class Iterator {
     // OVERVIEW: Iterator interface for BinarySearchTree.
     //           Iterates over the elements in ascending order as defined
@@ -228,6 +228,7 @@ public:
 
   }; // BinarySearchTree::Iterator
   ////////////////////////////////////////
+//--------------------------------------------------------------------------------------------------------ITERATOR ENDS------------------------------------------------------------------------
 
 
   // EFFECTS : Returns an iterator to the first element in this
@@ -534,11 +535,27 @@ private:
       if (node == nullptr) {
           return nullptr;
       }
+
+      // If the current node's value is greater than 'val'
+      if (less(val, node->datum)) {
+          Node *left_result = min_greater_than_impl(node->left, val, less);
+          // Check if there is a better candidate in the left subtree
+          return (left_result != nullptr) ? left_result : node;
+      }
+      else {
+          // If not, then the value we're looking for must be in the right subtree
+          return min_greater_than_impl(node->right, val, less);
+      }
+/*
+      if (node == nullptr) {
+          return nullptr;
+      }
       if (less(val, node->datum)) {
           Node *new_node = min_greater_than_impl(node->left, val, less);
           return (new_node != nullptr) ? new_node : node;
       }
       return min_greater_than_impl(node->right, val, less);
+ */
   }
 
 

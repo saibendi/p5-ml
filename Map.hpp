@@ -32,6 +32,11 @@ private:
 
   // A custom comparator
   class PairComp {
+  public:
+      Key_compare compare;
+      bool operator() (const Pair_type& A, const Pair_type& B) const {
+          return compare(A.first, B.first);
+      }
   };
 
 public:
@@ -53,11 +58,11 @@ public:
   // in the appropriate order for the Map.
   using Iterator = typename BinarySearchTree<Pair_type, PairComp>::Iterator;
 
-  // You should add in a default constructor, destructor, copy
-  // constructor, and overloaded assignment operator, if appropriate.
-  // If these operations will work correctly without defining them,
-  // you should omit them. A user of the class must be able to create,
-  // copy, assign, and destroy Maps.
+  // TODO: You should add in a default constructor, destructor, copy
+  // TODO: constructor, and overloaded assignment operator, if appropriate.
+  // TODO: If these operations will work correctly without defining them,
+  // TODO: you should omit them. A user of the class must be able to create,
+  // TODO: copy, assign, and destroy Maps.
 
 
   // EFFECTS : Returns whether this Map is empty.
@@ -111,7 +116,8 @@ public:
   Iterator end() const;
 
 private:
-  // Add a BinarySearchTree private member HERE.
+    // Add a BinarySearchTree private member HERE.
+    BinarySearchTree<Pair_type, PairComp> map_bst;
 };
 
 // You may implement member functions below using an "out-of-line" definition
@@ -120,9 +126,59 @@ private:
 // (Note that we're using K, V, and C as shorthands for Key_type,
 // Value_type, and Key_compare, respectively - the compiler doesn't
 // mind, and will just match them up by position.)
-//    template <typename K, typename V, typename C>
-//    typename Map<K, V, C>::Iterator Map<K, V, C>::begin() const {
-//      // YOUR IMPLEMENTATION GOES HERE
-//    }
+
+template <typename K, typename V, typename C>
+bool Map<K, V, C>::empty() const {
+    return map_bst.empty();
+}
+
+template <typename K, typename V, typename C>
+size_t Map<K, V, C>::size() const {
+    return map_bst.size();
+}
+
+// EFFECTS : Searches this Map for an element with a key equivalent
+//           to k and returns an Iterator to the associated value if found,
+//           otherwise returns an end Iterator.
+//
+// HINT: Since Map is implemented using a BinarySearchTree that stores
+//       (key, value) pairs, you'll need to construct a dummy value
+template <typename K, typename V, typename C>
+typename Map<K, V, C>::Iterator Map<K, V, C>::find(const K& k) const {
+    assert(false);
+    /*
+    Pair_type search(k, V());
+    auto it = map_bst.find(search);
+    return it;
+    */
+}
+
+template <typename K, typename V, typename C>
+typename Map<K, V, C>::Iterator Map<K, V, C>::begin() const {
+    assert(false);
+    /*
+    auto it = map_bst.begin();
+    return it;
+    */
+}
+
+template <typename K, typename V, typename C>
+typename Map<K, V, C>::Iterator Map<K, V, C>::end() const {
+    assert(false);
+    /*
+    auto it = map_bst.end();
+    return it;
+    */
+}
+
+template <typename K, typename V, typename C>
+V& Map<K, V, C>::operator[](const K& k) {
+    assert(false);
+}
+
+template <typename K, typename V, typename C>
+std::pair<typename Map<K, V, C>::Iterator, bool> Map<K, V, C>::insert(const Pair_type &val) {
+    assert(false);
+}
 
 #endif // DO NOT REMOVE!!!
