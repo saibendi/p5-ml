@@ -64,6 +64,17 @@ public:
   // TODO: you should omit them. A user of the class must be able to create,
   // TODO: copy, assign, and destroy Maps.
 
+    // default ctor
+    Map();
+    
+    // copy ctor
+    Map(const Map &other);
+    
+    // assignment operator
+    Map operator==(const Map &rhs);
+    
+    // dtor
+    ~Map();
 
   // EFFECTS : Returns whether this Map is empty.
   bool empty() const;
@@ -201,5 +212,33 @@ std::pair<typename Map<K, V, C>::Iterator, bool> Map<K, V, C>::insert(const Pair
     auto iterator = map_bst.insert(val);
     return std::make_pair(iterator,true);
 }
+
+// TODO: You should add in a default constructor, destructor, copy
+// TODO: constructor, and overloaded assignment operator, if appropriate.
+// TODO: If these operations will work correctly without defining them,
+// TODO: you should omit them. A user of the class must be able to create,
+// TODO: copy, assign, and destroy Maps.
+
+template <typename K, typename V, typename C>
+Map<K, V, C>::Map() {}
+
+template <typename K, typename V, typename C>
+Map<K, V, C>::Map(const Map &other) {
+    for (auto i : other) {
+        
+    }
+    assert(false);
+}
+
+template <typename K, typename V, typename C>
+Map<K, V, C> Map<K, V, C>::operator==(const Map &rhs) {
+    assert(false);
+}
+
+template <typename K, typename V, typename C>
+Map<K, V, C>::~Map() {
+    assert(false);
+}
+
 
 #endif // DO NOT REMOVE!!!
