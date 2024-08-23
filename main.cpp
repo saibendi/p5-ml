@@ -44,6 +44,20 @@ private:
       return words; // set is alphatbetically ordered BST
     }
     
+    void separatingCombinedWord(const string combinedWord, string &firstWord, string &label) {
+        // separating first word out of the combined word
+        string comma = "'";
+        size_t lastCommaIndex = combinedWord.find_last_of(comma);
+        firstWord = combinedWord.substr(lastCommaIndex+1, string::npos);
+
+        // separating label out of the rest of the combined word
+        label = combinedWord.substr(0,lastCommaIndex-1); // setting label to the word before the last comma
+        size_t anotherCommaIndex = label.find(comma);           // getting index of another comma if it exists in label
+        if (anotherCommaIndex != string::npos) {                // if we find another comma in the label, remove everything before the comma (incl. the comma) and set new label
+            label = label.erase(0,anotherCommaIndex);
+        }
+    }
+    
     // EFFECTS: adds words to map
     void addingWordsToMap(map<string,int> &map, const string word) {
         if (map.find(word) != map.end()) {
@@ -58,22 +72,13 @@ private:
   void unique_words_map(const string &str) {
         // defining stringstream and map
         istringstream source(str);
-
+        string firstWord;
+        string label;
         // separating out combinedWord : combinedWord = label + first word
         string combinedWord;
         source >> combinedWord;
         
-        // separating first word out of the combined word
-        string comma = "'";
-        size_t lastCommaIndex = combinedWord.find_last_of(comma);
-        string firstWord = combinedWord.substr(lastCommaIndex+1, string::npos);
-
-        // separating label out of the rest of the combined word
-        string label = combinedWord.substr(0,lastCommaIndex-1); // setting label to the word before the last comma
-        size_t anotherCommaIndex = label.find(comma);           // getting index of another comma if it exists in label
-        if (anotherCommaIndex != string::npos) {                // if we find another comma in the label, remove everything before the comma (incl. the comma) and set new label
-            label = label.erase(0,anotherCommaIndex);
-        }
+        separatingCombinedWord(combinedWord, firstWord, label);
         
         // check if label already exists or not
         auto result = find(labelVector.begin(), labelVector.end(), label);
