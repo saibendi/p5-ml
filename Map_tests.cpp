@@ -39,8 +39,7 @@ TEST(testReadCSV) {
     classifier object;
     string filename = "/Users/saibendi/Desktop/EECS280/p5-ml/train_small.csv";
     object.readFromTrainCSV(filename, true);
-    
-    
-    
+    object.calculateLogPrior();
+    object.printAllMaps();
 }
 TEST_MAIN()

@@ -47,7 +47,7 @@ private:
     void addingWordsToTagMap(map<string,pair<int,double>> &map, const string word) {
         if (map.find(word) != map.end()) {
             auto value = map.at(word);
-            ++value.first;
+            value.first = 2;
         }
         else {
             auto defaultValue = make_pair(numExample,0.0);
@@ -63,7 +63,7 @@ private:
             pairType value = map.at(pair);
              */
             auto value = map.at(pair);
-            ++value.first;
+            value.first = ++(value.first);
         }
         else {
             auto defaultValue = make_pair(numExample,0.0);
@@ -209,7 +209,6 @@ public:
         }
     }
 
-/*
     void calculateLogLikelihood(const string label, const int numTrainingPostsWithLabelC) {
         for (auto tagContentMapValue : tagContentMap) {
             auto tagContent = tagContentMapValue.first;
@@ -237,5 +236,4 @@ public:
         }
     }
 
-    */
 };
