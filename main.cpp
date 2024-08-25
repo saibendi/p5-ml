@@ -27,49 +27,44 @@ private:
     map<string, int> contentMap;
     
     // base number of examples if a label is found
-    const int numExample = 1;
-
+    const int defaultNumExample = 1;
+    
     // total number of training posts
     int numTrainingPosts = 0;
+    
     /*
-    // EFFECTS: Return a set of unique whitespace delimited words
-    map<string, int> unique_words(const string &str) {
-      istringstream source(str);
-      map<string, int> words_map;
-      string word;
-      while (source >> word) {
-        words_map.insert(word);
-      }
-      return words_map;
-    }
+     // EFFECTS: Return a set of unique whitespace delimited words
+     map<string, int> unique_words(const string &str) {
+     istringstream source(str);
+     map<string, int> words_map;
+     string word;
+     while (source >> word) {
+     words_map.insert(word);
+     }
+     return words_map;
+     }
      */
     
     // EFFECTS: adds words to map
     void addingWordsToTagMap(map<string,pair<int,double>> &map, const string word) {
         if (map.find(word) != map.end()) {
             auto value = map.at(word);
-            ++value.first;
+            map[word] = make_pair(++value.first, value.second);
         }
         else {
-            auto defaultValue = make_pair(numExample,0.0);
+            auto defaultValue = make_pair(defaultNumExample,0.0);
             map[word] = defaultValue;
-            ++numTrainingPosts;
         }
     }
-
-        
+    
     // EFFECTS: adds words to map
     void addingWordsToTagContentMap(map<pair<string,string>,pair<int,double>> &map, const pair<string,string> pair) {
         if (map.find(pair) != map.end()) {
-            /*
-            using pairType = std::pair<int,double>;
-            pairType value = map.at(pair);
-             */
             auto value = map.at(pair);
-            ++value.first;
+            map[pair] = make_pair(++value.first, value.second);
         }
         else {
-            auto defaultValue = make_pair(numExample,0.0);
+            auto defaultValue = make_pair(defaultNumExample,0.0);
             map[pair] = defaultValue;
         }
     }
@@ -80,26 +75,61 @@ private:
             ++map.at(word);
         }
         else {
-            map[word] = numExample;
+            map[word] = defaultNumExample;
         }
     }
     
+    
+public:
+    
+    void printTagMap(const map<string,pair<int,double>> &map) {
+        cout << "classes:" << endl;
+        for (auto i : map) {
+            cout << "   " << i.first << ", " << i.second.first << " examples, log-prior = " << i.second.second << endl;
+        }
+    }
+    
+    void printTagContentMap(const map<pair<string,string>,pair<int,double>> &map) {
+        cout << "classifier parameters:" << endl;
+        for (auto i : map) {
+            cout << "   " << i.first.first << ":" << i.first.second << ", count = " << i.second.first << ", log-likelihood = " << i.second.second << endl;
+        }
+        // an extra blank line
+        cout << endl;
+    }
+    
+    void printContentMap(const map<string,int> &map) {
+        cout << "---CONTENT MAP-----------" << endl;
+        for (auto i : map) {
+            cout << i.first << ", " << i.second << endl;
+        }
+    }
+    
+    void printAllMaps() {
+        printTagMap(tagMap);
+        //printContentMap(contentMap);
+        printTagContentMap(tagContentMap);
+    }
+    
+    // -------------------------------TEST FUNCTIONS ABOVE-----------------------------------------------------------------------------------------
+    
+    void getVocabSize() {
+        cout << "vocabulary size = " << contentMap.size() << endl;
+    }
+    
+    void getTrainingPosts() {
+        cout << "trained on " << numTrainingPosts << " examples" << endl;
+    }
+    
     void printData(const string label, const vector<pair<string,string>> &vector_in) {
-        cout << "training data:" << endl;
-        cout << "label = " << label << ", content =";
+        cout << "   label = " << label << ", content =";
         for (auto pair : vector_in) {
             if (pair.first == "content") {
                 cout << " " << pair.second;
             }
         }
-        cout << endl;
     }
-
-public:
-    // default ctor;
-    classifier() {
-        
-    }
+    
     
     // EFFECTS: reads from filename and sets the playing field, also checks if debug is on to spit out what we read
     void readFromTrainCSV(const string filename, bool debug) {
@@ -110,23 +140,18 @@ public:
         vector<string> throwawayLine;       // vector of strings for header
         throwawayLine = file.getheader();   // reading header
         
-        // Reading in from CSV row by row
-        vector <pair<string, string>> vector_StringPair;
-        while (true) {
-            // vector_StringPair gets cleared each time and reads in a new row
-            file >> vector_StringPair;
-            
-            // if vector is empty after reading in from csv, break from loop
-            if (vector_StringPair.empty()) {
-                break;
-            }
-
+        // read row by row
+        vector<pair<string, string>> vector_StringPair;
+        if (debug) {
+            cout << "training data:" << endl;
+        }
+        while (file >> vector_StringPair) {
             // if not empty, parse data and add to individual maps
             string label;
             for (auto pair : vector_StringPair) {
                 string header = pair.first;
                 string word = pair.second;
-                                
+                
                 // if first part of pair is "tag", add to tagMap
                 if (header == "tag") {
                     // if tag, word turns into a label
@@ -141,51 +166,50 @@ public:
                     // then add word to contentMap
                     string sentence = word;
                     // EFFECTS: Return a set of unique whitespace delimited words
-                      istringstream source(sentence);
-                      string contentWord;
-                      while (source >> contentWord) {
-                          addingWordsToContentMap(contentMap, contentWord);
-                          addingWordsToTagContentMap(tagContentMap, make_pair(label,contentWord));
-                      }
+                    istringstream source(sentence);
+                    string contentWord;
+                    while (source >> contentWord) {
+                        addingWordsToContentMap(contentMap, contentWord);
+                        addingWordsToTagContentMap(tagContentMap, make_pair(label,contentWord));
+                    }
                 }
             }
-            
             // Step A (debug). Print out data
             if (debug == true) {
                 printData(label, vector_StringPair);
+                cout << endl;
             }
         }
     }
-
-    void calculateLogLikelihood(const string label, const int numTrainingPostsWithLabelC) {
+    
+    void calculateLogLikelihood(const string label, const double numTrainingPostsWithLabelC) {
+        cout.precision(3);
         for (auto tagContentMapValue : tagContentMap) {
-            auto tagContent = tagContentMapValue.first;
-            auto intDouble = tagContentMapValue.second;
-
-            if (tagContent.first == label) {
-                double logLikelihood = log(intDouble.first / numTrainingPostsWithLabelC);
-                intDouble.second = logLikelihood;
+            auto key = tagContentMapValue.first;
+            auto value = tagContentMapValue.second;
+            double numTrainingPostsWithLabelCThatContainW = value.first;
+            if (key.first == label) {
+                double logLikelihood = log(numTrainingPostsWithLabelCThatContainW / numTrainingPostsWithLabelC);
+                tagContentMap[key] = make_pair(numTrainingPostsWithLabelCThatContainW, logLikelihood);
             }
         }
     }
     
     void calculateLogPrior() {
+        cout.precision(3);
         for (auto tagMapValue : tagMap) {
-            string label = tagMapValue.first;
-            auto labelIntDouble = tagMapValue.second;
-            int numTrainingPostsWithLabelC = labelIntDouble.first;
-            
-            // calculating Log Prior and replacing map occurrence value with log-prior value
+            string key = tagMapValue.first;
+            auto value = tagMapValue.second;
+            double numTrainingPostsWithLabelC = value.first;
+            // calculating Log Prior and adding to map
             double logPrior = log(numTrainingPostsWithLabelC / numTrainingPosts);
-            labelIntDouble.second = logPrior;
+            tagMap[key] = make_pair(numTrainingPostsWithLabelC, logPrior);
             
             //calculating Log Likelihood
-            calculateLogLikelihood(label, numTrainingPostsWithLabelC);
+            calculateLogLikelihood(key, numTrainingPostsWithLabelC);
         }
     }
-    
 };
-
 
 
 
