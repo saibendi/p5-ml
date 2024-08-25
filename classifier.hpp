@@ -1,9 +1,10 @@
 //
-//  main.cpp
+//  classifier.hpp
 //  p5-ml
 //
-//  Created by Bends on 8/6/24.
+//  Created by Bends on 8/23/24.
 //
+
 
 #include <iostream>
 #include <fstream>
@@ -13,11 +14,8 @@
 #include <set>
 #include <map>
 #include "csvstream.hpp"
-#include <cmath>
 
 using namespace std;
-
-void errorChecker();
 
 class classifier {
 private:
@@ -25,12 +23,13 @@ private:
     map<string, pair<int,double>> tagMap;
     map<pair<string,string>, pair<int, double>> tagContentMap;
     map<string, int> contentMap;
-    
+
     // base number of examples if a label is found
     const int numExample = 1;
 
     // total number of training posts
     int numTrainingPosts = 0;
+
     /*
     // EFFECTS: Return a set of unique whitespace delimited words
     map<string, int> unique_words(const string &str) {
@@ -53,10 +52,8 @@ private:
         else {
             auto defaultValue = make_pair(numExample,0.0);
             map[word] = defaultValue;
-            ++numTrainingPosts;
         }
     }
-
         
     // EFFECTS: adds words to map
     void addingWordsToTagContentMap(map<pair<string,string>,pair<int,double>> &map, const pair<string,string> pair) {
@@ -83,6 +80,75 @@ private:
             map[word] = numExample;
         }
     }
+
+    
+public:
+    
+    void getTrainingPosts() {
+        cout << numTrainingPosts << endl;
+    }
+    
+    void printTagMap(const map<string,pair<int,double>> &map) {
+        cout << "---TAG MAP-----------" << endl;
+        for (auto i : map) {
+            cout << i.first << ", " << i.second.first << ", " << i.second.second << endl;
+        }
+    }
+    
+    void printTagContentMap(const map<pair<string,string>,pair<int,double>> &map) {
+        cout << "---TAG CONTENT MAP-----------" << endl;
+        for (auto i : map) {
+            cout << "{" << i.first.first << ", " << i.first.second << "}"  << " " << i.second.first << " " << i.second.second << endl;
+        }
+    }
+
+    void printContentMap(const map<string,int> &map) {
+        cout << "---CONTENT MAP-----------" << endl;
+        for (auto i : map) {
+            cout << i.first << ", " << i.second << endl;
+        }
+    }
+
+    
+    void printAllMaps() {
+        printTagMap(tagMap);
+        printContentMap(contentMap);
+        printTagContentMap(tagContentMap);
+    }
+    
+    void testStringPairVectorParsing(vector <pair<string, string>> vector_StringPair) {
+        string label;
+            for (auto pair : vector_StringPair) {
+                string header = pair.first;
+                string word = pair.second;
+                // if first part of pair is "tag", add to tagMap
+                if (header == "tag") {
+                    // if tag, word turns into a tag
+                    label = word;
+                    // then add word to tagMap
+                    addingWordsToTagMap(tagMap, label);
+                    ++numTrainingPosts;
+                }
+                else if (header == "content") {
+                    // if content, word turns into a content word
+                    // then add word to contentMap
+                    addingWordsToContentMap(contentMap, word);
+                    addingWordsToTagContentMap(tagContentMap, make_pair(label,word));
+                }
+            }
+        cout << "training data:" << endl;
+        cout << "label = " << label << ", content =";
+        for (auto pair : vector_StringPair) {
+            if (pair.first == "content") {
+                cout << " " << pair.second;
+            }
+        }
+        cout << endl;
+
+    }
+    
+    // -------------------------------TEST FUNCTIONS ABOVE-----------------------------------------------------------------------------------------
+
     
     void printData(const string label, const vector<pair<string,string>> &vector_in) {
         cout << "training data:" << endl;
@@ -92,14 +158,8 @@ private:
                 cout << " " << pair.second;
             }
         }
-        cout << endl;
     }
-
-public:
-    // default ctor;
-    classifier() {
-        
-    }
+     
     
     // EFFECTS: reads from filename and sets the playing field, also checks if debug is on to spit out what we read
     void readFromTrainCSV(const string filename, bool debug) {
@@ -144,10 +204,13 @@ public:
                 }
             }
             
+            /*
             // Step A (debug). Print out data
             if (debug == true) {
                 printData(label, vector_StringPair);
             }
+             */
+             
         }
     }
 
@@ -177,37 +240,6 @@ public:
             calculateLogLikelihood(label, numTrainingPostsWithLabelC);
         }
     }
+
     
 };
-
-
-
-
-int main(int argc, const char * argv[]) {
-    cout.precision(3);
-
-    if (argc > 4) {
-        cout << "Usage: main.exe TRAIN_FILE TEST_FILE [--debug]" << endl;
-        return 1;
-    }
-    // if argv[3] exists and it isn't set to "--debug"
-    if (argv[3] && argv[3] != "--debug") {
-        cout << "Usage: main.exe TRAIN_FILE TEST_FILE [--debug]" << endl;
-        return 1;
-    }
-    
-    /*
-    string train_filename = argv[1];
-    ifstream fin(train_filename);
-    if (!fin.is_open()) {
-        cout << "Error opening file: " << train_filename << endl;
-        return 1;
-    }
-     */
-    
-    
-    // need to check if debug option is ON / OFF
-    return 0;
-}
-
-

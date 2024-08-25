@@ -52,7 +52,7 @@ Map_public_tests.exe: Map_public_tests.cpp Map.hpp BinarySearchTree.hpp
 Map_compile_check.exe: Map_compile_check.cpp Map.hpp BinarySearchTree.hpp
 	$(CXX) $(CXXFLAGS) $< -o $@
 
-Map_tests.exe: Map_tests.cpp Map.hpp BinarySearchTree.hpp
+Map_tests.exe: Map_tests.cpp Map.hpp BinarySearchTree.hpp classifier.hpp
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 # disable built-in rules
