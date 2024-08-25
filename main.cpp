@@ -139,8 +139,14 @@ public:
                 else if (header == "content") {
                     // if content, word turns into a content word
                     // then add word to contentMap
-                    addingWordsToContentMap(contentMap, word);
-                    addingWordsToTagContentMap(tagContentMap, make_pair(label,word));
+                    string sentence = word;
+                    // EFFECTS: Return a set of unique whitespace delimited words
+                      istringstream source(sentence);
+                      string contentWord;
+                      while (source >> contentWord) {
+                          addingWordsToContentMap(contentMap, contentWord);
+                          addingWordsToTagContentMap(tagContentMap, make_pair(label,contentWord));
+                      }
                 }
             }
             

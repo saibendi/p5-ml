@@ -153,9 +153,11 @@ public:
     void printData(const string label, const vector<pair<string,string>> &vector_in) {
         cout << "training data:" << endl;
         cout << "label = " << label << ", content =";
+        /*
         for (auto pair :vector_in) {
             cout << pair.first << " " << pair.second << " ";
         }
+         */
         for (auto pair : vector_in) {
             if (pair.first == "content") {
                 cout << " " << pair.second;
@@ -173,6 +175,8 @@ public:
         vector<string> throwawayLine;       // vector of strings for header
         throwawayLine = file.getheader();   // reading header
         
+        vector <pair<string, string>> vector_StringPair;
+        /*
         for (auto i : throwawayLine) {
             cout << i << " ";
         }
@@ -184,16 +188,10 @@ public:
         for (auto i : vector_StringPair) {
             cout << i.first << " " << i.second << " " << endl;
         }
-        /*
-        while (true) {
-            // vector_StringPair gets cleared each time and reads in a new row
-            file >> vector_StringPair;
+         */
+        while (file >> vector_StringPair) {
+            cout << "NOT BREAKING" << endl;
             
-            // if vector is empty after reading in from csv, break from loop
-            if (vector_StringPair.empty()) {
-                break;
-            }
-
             // if not empty, parse data and add to individual maps
             string label;
             for (auto pair : vector_StringPair) {
@@ -212,19 +210,22 @@ public:
                 else if (header == "content") {
                     // if content, word turns into a content word
                     // then add word to contentMap
-                    addingWordsToContentMap(contentMap, word);
-                    addingWordsToTagContentMap(tagContentMap, make_pair(label,word));
+                    string sentence = word;
+                    // EFFECTS: Return a set of unique whitespace delimited words
+                      istringstream source(sentence);
+                      string contentWord;
+                      while (source >> contentWord) {
+                          addingWordsToContentMap(contentMap, contentWord);
+                          addingWordsToTagContentMap(tagContentMap, make_pair(label,contentWord));
+                      }
                 }
             }
-            
-            */
-        /*
             // Step A (debug). Print out data
-            if (debug == true) {
+            if (debug == true && !vector_StringPair.empty()) {
+                cout << "PRINTING DATA" << endl;
                 printData(label, vector_StringPair);
             }
-    */
-        //}
+        }
     }
 
 /*
