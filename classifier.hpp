@@ -151,13 +151,7 @@ public:
 
     
     void printData(const string label, const vector<pair<string,string>> &vector_in) {
-        cout << "training data:" << endl;
         cout << "label = " << label << ", content =";
-        /*
-        for (auto pair :vector_in) {
-            cout << pair.first << " " << pair.second << " ";
-        }
-         */
         for (auto pair : vector_in) {
             if (pair.first == "content") {
                 cout << " " << pair.second;
@@ -176,22 +170,9 @@ public:
         throwawayLine = file.getheader();   // reading header
         
         vector <pair<string, string>> vector_StringPair;
-        /*
-        for (auto i : throwawayLine) {
-            cout << i << " ";
-        }
-        cout << endl;
-        // Reading in from CSV row by row
-        string label = "TEST";
-        vector <pair<string, string>> vector_StringPair;
-        file >> vector_StringPair;
-        for (auto i : vector_StringPair) {
-            cout << i.first << " " << i.second << " " << endl;
-        }
-         */
+
+        cout << "training data:" << endl;
         while (file >> vector_StringPair) {
-            cout << "NOT BREAKING" << endl;
-            
             // if not empty, parse data and add to individual maps
             string label;
             for (auto pair : vector_StringPair) {
@@ -221,10 +202,10 @@ public:
                 }
             }
             // Step A (debug). Print out data
-            if (debug == true && !vector_StringPair.empty()) {
-                cout << "PRINTING DATA" << endl;
+            if (debug == true) {
                 printData(label, vector_StringPair);
             }
+            cout << endl;
         }
     }
 
