@@ -176,11 +176,14 @@ public:
         for (auto i : throwawayLine) {
             cout << i << " ";
         }
-        
+        cout << endl;
         // Reading in from CSV row by row
         string label = "TEST";
         vector <pair<string, string>> vector_StringPair;
-        
+        file >> vector_StringPair;
+        for (auto i : vector_StringPair) {
+            cout << i.first << " " << i.second << " " << endl;
+        }
         /*
         while (true) {
             // vector_StringPair gets cleared each time and reads in a new row
@@ -215,12 +218,12 @@ public:
             }
             
             */
-        
+        /*
             // Step A (debug). Print out data
             if (debug == true) {
                 printData(label, vector_StringPair);
             }
-             
+    */
         //}
     }
 
