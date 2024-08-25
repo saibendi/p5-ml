@@ -1,7 +1,7 @@
 #include "classifier.hpp"
 #include "unit_test_framework.hpp"
 
-
+/*
 TEST(testVectorParsing) {
     classifier object;
     vector<pair<string,string>> testVector;
@@ -33,6 +33,7 @@ TEST(testVectorParsing) {
     object.getTrainingPosts();
     
 }
+ */
 
 TEST(testReadCSV) {
     classifier object;

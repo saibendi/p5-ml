@@ -153,6 +153,9 @@ public:
     void printData(const string label, const vector<pair<string,string>> &vector_in) {
         cout << "training data:" << endl;
         cout << "label = " << label << ", content =";
+        for (auto pair :vector_in) {
+            cout << pair.first << " " << pair.second << " ";
+        }
         for (auto pair : vector_in) {
             if (pair.first == "content") {
                 cout << " " << pair.second;
@@ -170,8 +173,15 @@ public:
         vector<string> throwawayLine;       // vector of strings for header
         throwawayLine = file.getheader();   // reading header
         
+        for (auto i : throwawayLine) {
+            cout << i << " ";
+        }
+        
         // Reading in from CSV row by row
+        string label = "TEST";
         vector <pair<string, string>> vector_StringPair;
+        
+        /*
         while (true) {
             // vector_StringPair gets cleared each time and reads in a new row
             file >> vector_StringPair;
@@ -204,16 +214,17 @@ public:
                 }
             }
             
-            /*
+            */
+        
             // Step A (debug). Print out data
             if (debug == true) {
                 printData(label, vector_StringPair);
             }
-             */
              
-        }
+        //}
     }
 
+/*
     void calculateLogLikelihood(const string label, const int numTrainingPostsWithLabelC) {
         for (auto tagContentMapValue : tagContentMap) {
             auto tagContent = tagContentMapValue.first;
@@ -241,5 +252,5 @@ public:
         }
     }
 
-    
+    */
 };
