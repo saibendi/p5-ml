@@ -32,18 +32,6 @@ private:
     // total number of training posts
     int numTrainingPosts = 0;
     
-    /*
-     // EFFECTS: Return a set of unique whitespace delimited words
-     map<string, int> unique_words(const string &str) {
-     istringstream source(str);
-     map<string, int> words_map;
-     string word;
-     while (source >> word) {
-     words_map.insert(word);
-     }
-     return words_map;
-     }
-     */
     
     // EFFECTS: adds words to map
     void addingWordsToTagMap(map<string,pair<int,double>> &map, const string word) {
@@ -79,9 +67,6 @@ private:
         }
     }
     
-    
-public:
-    
     void printTagMap(const map<string,pair<int,double>> &map) {
         cout << "classes:" << endl;
         for (auto i : map) {
@@ -97,22 +82,22 @@ public:
         // an extra blank line
         cout << endl;
     }
-    
+    /*
     void printContentMap(const map<string,int> &map) {
-        cout << "---CONTENT MAP-----------" << endl;
         for (auto i : map) {
             cout << i.first << ", " << i.second << endl;
         }
     }
+     */
+
+public:
     
     void printAllMaps() {
         printTagMap(tagMap);
         //printContentMap(contentMap);
         printTagContentMap(tagContentMap);
     }
-    
-    // -------------------------------TEST FUNCTIONS ABOVE-----------------------------------------------------------------------------------------
-    
+
     void getVocabSize() {
         cout << "vocabulary size = " << contentMap.size() << endl;
     }
@@ -129,7 +114,6 @@ public:
             }
         }
     }
-    
     
     // EFFECTS: reads from filename and sets the playing field, also checks if debug is on to spit out what we read
     void readFromTrainCSV(const string filename, bool debug) {
@@ -209,8 +193,93 @@ public:
             calculateLogLikelihood(key, numTrainingPostsWithLabelC);
         }
     }
-};
+    
+    void pickMaxProbability(vector<pair<string,double>> &labelProbability, string &labelWinner, double &max) {
+        for (auto pair : labelProbability) {
+            if (pair.second > max) {
+                labelWinner = pair.first;
+                max = pair.second;
+            }
+            // if probability is the same
+            else if (pair.second == max) {
+                // then use first label in alphabetical order
+                if (pair.first < labelWinner) {
+                    labelWinner = pair.first;
+                    max = pair.second;
+                }
+            }
+        }
+    }
+    void calculateProbability(vector<pair<string, string>> &vector_StringPair) {
+        double logProbability = 0.0;
+        vector<pair<string,double>> labelProbability = {};
+        for (auto tag: tagMap) {
+            // for each tag, add the tag's logPrior
+            // we need to do it against every tag in tagMap
+            logProbability = tag.second.second;
+            double sumOfLogLikelihood = 0.0;
+            
+            // loop through each word from the row we read in
+            for (auto pair : vector_StringPair) {
+                string header = pair.first;
+                string word = pair.second;
+                double logLikelihood = 0.0;
+                
+                // if header is content, then get the log-likelihood of word
+                if (header == "content") {
+                    auto key = make_pair(tag.first, word);
+                    // if found in map, add the likelihood to sum
+                    if (tagContentMap.find(key) != tagContentMap.end()) {
+                        auto value = tagContentMap[key];
+                        logLikelihood = value.second;
+                    }
+                    // if not found in map, there's two possibilities:
+                    else {
+                        // A) check to see if word is in content
+                        if (contentMap.find(word) != contentMap.end()) {
+                            double numTrainingPostsThatContainW = contentMap[word];
+                            logLikelihood = numTrainingPosts / numTrainingPosts;
+                        }
+                        // B) if word isn't anywhere in classifier maps, then do 1 / numTrainingPosts
+                        else {
+                            logLikelihood = 1.0 / numTrainingPosts;
+                        }
+                    }
+                }
+                
+                // sum up all log-likelihoods for each content word
+                sumOfLogLikelihood = sumOfLogLikelihood + logLikelihood;
+            }
+            
+            // now summing log-prior and sum(log-likelihood)
+            logProbability = logProbability + sumOfLogLikelihood;
+            labelProbability.push_back(make_pair(tag.first, logProbability));
+        }
+        string labelWinner;
+        double maxProbability = -INFINITY;
+        pickMaxProbability(labelProbability, labelWinner, maxProbability);
+        cout << "this is the label: " << labelWinner << "; this is the probability: " << maxProbability << endl;
+    }
+    
+    // EFFECTS: reads from filename and sets the playing field, also checks if debug is on to spit out what we read
+    void readFromTestCSV(const string filename) {
+        // creating csvstream object
+        csvstream file(filename);
+        
+        // get header
+        vector<string> throwawayLine;       // vector of strings for header
+        throwawayLine = file.getheader();   // reading header
+        
+        // read row by row
+        vector<pair<string, string>> vector_StringPair;
 
+        while (file >> vector_StringPair) {
+            calculateProbability(vector_StringPair);
+            cout << endl;
+        }
+    }
+
+};
 
 
 int main(int argc, const char * argv[]) {

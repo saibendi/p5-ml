@@ -40,7 +40,7 @@ TEST(testVectorParsing) {
 TEST(testReadCSV) {
     classifier object;
     string filename = "/Users/saibendi/Desktop/EECS280/p5-ml/train_small.csv";
-    bool debug = false;
+    bool debug = true;
     object.readFromTrainCSV(filename, debug);
     object.getTrainingPosts();
     object.calculateLogPrior();
@@ -49,13 +49,16 @@ TEST(testReadCSV) {
         object.printAllMaps();
     }
     
+    string filename2 = "/Users/saibendi/Desktop/EECS280/p5-ml/test_small.csv";
+    object.readFromTestCSV(filename2);
 }
+
 
 /*
 TEST(testLog) {
     // doing log (3/8), for e.g., is causing 3/8 round down to 0, and then we're getting log(0) which is -inf;
     // to avoid, need to use doubles instead of ints
-    cout << log(3.0/8.0) << endl;
+    cout << log(3.0/8) << endl;
 }
 */
 
