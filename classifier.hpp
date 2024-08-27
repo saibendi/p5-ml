@@ -46,7 +46,7 @@ private:
     // EFFECTS: adds words to map
     void addingWordsToTagMap(map<string,pair<int,double>> &map, const string word) {
         if (map.find(word) != map.end()) {
-            auto value = map.at(word);
+            auto value = map[word];
             map[word] = make_pair(++value.first, value.second);
         }
         else {
@@ -58,7 +58,7 @@ private:
     // EFFECTS: adds words to map
     void addingWordsToTagContentMap(map<pair<string,string>,pair<int,double>> &map, const pair<string,string> pair) {
         if (map.find(pair) != map.end()) {
-            auto value = map.at(pair);
+            auto value = map[pair];
             map[pair] = make_pair(++value.first, value.second);
         }
         else {
@@ -70,7 +70,7 @@ private:
     // EFFECTS: adds words to map
     void addingWordsToContentMap(map<string,int> &map, const string word) {
         if (map.find(word) != map.end()) {
-            ++map.at(word);
+            ++map[word];
         }
         else {
             map[word] = defaultNumExample;
@@ -79,7 +79,72 @@ private:
 
     
 public:
-    
+    void testCalculateProbability(string &contentString) {
+        cout.precision(3);
+        double logProbability = 0.0;
+        vector<pair<string,double>> labelProbability = {};
+        
+        // loop through each tag in tagMap
+        for (auto tag: tagMap) {
+            cout << "                                             DEBUG - Tag is: " << tag.first << endl;
+            // for each tag, add the tag's logPrior
+            logProbability = tag.second.second;
+            double sumOfLogLikelihood = 0.0;
+            
+            // if header is content, then get the sentence
+            // EFFECTS: Return a set of unique whitespace delimited words
+            istringstream source(contentString);
+            string contentWord;
+            
+            // loop through each word from the row we read in
+            while (source >> contentWord) {
+                double logLikelihood = 0.0;
+                cout << "                                                              DEBUG - Word: " << contentWord << endl;
+                auto key = make_pair(tag.first, contentWord);
+                // if found in map, add the likelihood to sum
+                if (tagContentMap.find(key) != tagContentMap.end()) {
+                    cout << "DEBUG - Found in Map for this tag" << endl;
+                    auto value = tagContentMap[key];
+                    //cout << "DEBUG - Number of Training Posts With this Tag That Contain W: " << numTrainingPostsThatContainW << endl;
+                    logLikelihood = (double) value.second;
+                }
+                // if not found in map, there's two possibilities:
+                else {
+                    // A) check to see if word is in content
+                    if (contentMap.find(contentWord) != contentMap.end()) {
+                        cout << "DEBUG -       Found in ContentMap" << endl;
+                        double numTrainingPostsThatContainW = contentMap[contentWord];
+                        cout << "DEBUG - Number of Training Posts That Contain W: " << numTrainingPostsThatContainW << endl;
+                        logLikelihood = log((double)numTrainingPostsThatContainW / (double)numTrainingPosts);
+                    }
+                    // B) if word isn't anywhere in classifier maps, then do 1 / numTrainingPosts
+                    else {
+                        cout << "DEBUG -               Not Found" << endl;
+                        logLikelihood = log((double)1.0 / (double)numTrainingPosts);
+                    }
+                }
+                // sum up all log-likelihoods for each content word
+                sumOfLogLikelihood = sumOfLogLikelihood + logLikelihood;
+                cout << "DEBUG - log-likelihood: " << logLikelihood << ", Sum: " << sumOfLogLikelihood << endl;
+            }
+            
+            // now summing log-prior and sum(log-likelihood)
+            cout << "DEBUG - log-prior: " << logProbability << " +  Sum(log-probability): " << sumOfLogLikelihood << " = " << logProbability + sumOfLogLikelihood << endl << endl;
+            logProbability = logProbability + sumOfLogLikelihood;
+            labelProbability.push_back(make_pair(tag.first, logProbability));
+        }
+        
+        
+        for (auto i : labelProbability) {
+            cout << "DEBUG - " << i.first << "," << i.second << endl;
+        }
+
+        string labelWinner;
+        double maxProbability = -INFINITY;
+        pickMaxProbability(labelProbability, labelWinner, maxProbability);
+        cout << "this is the label: " << labelWinner << "; this is the probability: " << maxProbability << endl;
+    }
+
     void printTagMap(const map<string,pair<int,double>> &map) {
         cout << "classes:" << endl;
         for (auto i : map) {
@@ -166,8 +231,9 @@ public:
                     // EFFECTS: Return a set of unique whitespace delimited words
                       istringstream source(sentence);
                       string contentWord;
-                    set<string> uniqueWordsPerPost;
+                    set<string> uniqueWordsPerPost = {};
                       while (source >> contentWord) {
+                          // if we don't find in uniqueWords - word is new
                           if (uniqueWordsPerPost.find(contentWord) == uniqueWordsPerPost.end()) {
                               uniqueWordsPerPost.insert(contentWord);
                               addingWordsToContentMap(contentMap, contentWord);
@@ -184,31 +250,35 @@ public:
         }
     }
 
-    void calculateLogLikelihood(const string label, const double numTrainingPostsWithLabelC) {
+    void calculateLogLikelihood(const string label, double numTrainingPostsWithLabelC, bool test) {
         cout.precision(3);
         for (auto tagContentMapValue : tagContentMap) {
             auto key = tagContentMapValue.first;
             auto value = tagContentMapValue.second;
             double numTrainingPostsWithLabelCThatContainW = value.first;
             if (key.first == label) {
-                double logLikelihood = log(numTrainingPostsWithLabelCThatContainW / numTrainingPostsWithLabelC);
+                double logLikelihood = log((double) numTrainingPostsWithLabelCThatContainW / (double) numTrainingPostsWithLabelC);
                 tagContentMap[key] = make_pair(numTrainingPostsWithLabelCThatContainW, logLikelihood);
+                if (test) {
+                    cout << tagContentMap[key].first << " - " << tagContentMap[key].second << endl;
+                }
             }
         }
     }
     
-    void calculateLogPrior() {
+    void calculateLogPrior(bool test) {
         cout.precision(3);
         for (auto tagMapValue : tagMap) {
             string key = tagMapValue.first;
             auto value = tagMapValue.second;
             double numTrainingPostsWithLabelC = value.first;
             // calculating Log Prior and adding to map
-            double logPrior = log(numTrainingPostsWithLabelC / numTrainingPosts);
+            double logPrior = log((double)numTrainingPostsWithLabelC / (double) numTrainingPosts);
+            cout << "DEBUG- label: " << key << ", numTrainingPostsWithLabelC: " << numTrainingPostsWithLabelC << endl;
             tagMap[key] = make_pair(numTrainingPostsWithLabelC, logPrior);
             
             //calculating Log Likelihood
-            calculateLogLikelihood(key, numTrainingPostsWithLabelC);
+            calculateLogLikelihood(key, numTrainingPostsWithLabelC, test);
         }
     }
     
@@ -228,7 +298,9 @@ public:
             }
         }
     }
+    
     void calculateProbability(string &contentString) {
+        cout.precision(3);
         double logProbability = 0.0;
         vector<pair<string,double>> labelProbability = {};
         
@@ -242,34 +314,35 @@ public:
             // EFFECTS: Return a set of unique whitespace delimited words
             istringstream source(contentString);
             string contentWord;
-            double logLikelihood = 0.0;
+            
             // loop through each word from the row we read in
             while (source >> contentWord) {
-                cout << contentWord << endl;
+                double logLikelihood = 0.0;
+                //cout << contentWord << endl;
                 auto key = make_pair(tag.first, contentWord);
                 // if found in map, add the likelihood to sum
                 if (tagContentMap.find(key) != tagContentMap.end()) {
-                    cout << "Found in Map" << endl;
+                    //cout << "Found in Map" << endl;
                     auto value = tagContentMap[key];
-                    logLikelihood = value.second;
+                    logLikelihood = (double) value.second;
                 }
                 // if not found in map, there's two possibilities:
                 else {
                     // A) check to see if word is in content
                     if (contentMap.find(contentWord) != contentMap.end()) {
-                        cout << "       Found in ContentMap" << endl;
+                        //cout << "       Found in ContentMap" << endl;
                         double numTrainingPostsThatContainW = contentMap[contentWord];
-                        logLikelihood = log(numTrainingPostsThatContainW / numTrainingPosts);
+                        logLikelihood = log((double)numTrainingPostsThatContainW / (double)numTrainingPosts);
                     }
                     // B) if word isn't anywhere in classifier maps, then do 1 / numTrainingPosts
                     else {
-                        cout << "               Not Found" << endl;
-                        logLikelihood = log(1.0 / numTrainingPosts);
+                        //cout << "               Not Found" << endl;
+                        logLikelihood = log((double)1.0 / (double)numTrainingPosts);
                     }
                 }
                 // sum up all log-likelihoods for each content word
                 sumOfLogLikelihood = sumOfLogLikelihood + logLikelihood;
-                cout << "DEBUG - log-likelihood: " << logLikelihood << ", Sum: " << sumOfLogLikelihood << endl;
+                //cout << "DEBUG - log-likelihood: " << logLikelihood << ", Sum: " << sumOfLogLikelihood << endl;
             }
             
             // now summing log-prior and sum(log-likelihood)
@@ -277,6 +350,11 @@ public:
             labelProbability.push_back(make_pair(tag.first, logProbability));
         }
         
+        
+        for (auto i : labelProbability) {
+            cout << "DEBUG - " << i.first << "," << i.second << endl;
+        }
+
         string labelWinner;
         double maxProbability = -INFINITY;
         pickMaxProbability(labelProbability, labelWinner, maxProbability);
