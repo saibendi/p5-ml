@@ -166,10 +166,10 @@ public:
                     // EFFECTS: Return a set of unique whitespace delimited words
                       istringstream source(sentence);
                       string contentWord;
-                    set<string> uniqueWords;
+                    set<string> uniqueWordsPerPost;
                       while (source >> contentWord) {
-                          if (uniqueWords.find(contentWord) == uniqueWords.end()) {
-                              uniqueWords.insert(contentWord);
+                          if (uniqueWordsPerPost.find(contentWord) == uniqueWordsPerPost.end()) {
+                              uniqueWordsPerPost.insert(contentWord);
                               addingWordsToContentMap(contentMap, contentWord);
                               addingWordsToTagContentMap(tagContentMap, make_pair(label,contentWord));
                           }
